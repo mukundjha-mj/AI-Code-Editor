@@ -6,6 +6,12 @@ export type EditorEventMap = {
   cursorChanged: { path: string; lineNumber: number; column: number };
   contentChanged: { path: string; isDirty: boolean };
   symbolSelected: { path: string; symbol: string };
+  explainTargetSelected: {
+    target: "file" | "component" | "function" | "class" | "module" | "route";
+    path?: string;
+    symbol?: string;
+    route?: string;
+  };
 };
 
 export interface SerializedSelection {

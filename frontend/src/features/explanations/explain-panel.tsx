@@ -57,6 +57,26 @@ export const ExplainPanel = ({ activeFilePath, symbols, routes }: ExplainPanelPr
     return unsubscribe;
   }, [activeFilePath, symbols]);
 
+  useEffect(() => {
+    const unsubscribe = editorEventBus.subscribe("explainTargetSelected", (payload) => {
+      setTarget(payload.target);
+      if (payload.path) {
+        setSymbol("");
+        setRoute("");
+      }
+      if (payload.symbol) {
+        setSymbol(payload.symbol);
+      }
+      if (payload.route) {
+        setRoute(payload.route);
+      }
+      setExplainResult(null);
+      setStreamText("");
+      setError(null);
+    });
+    return unsubscribe;
+  }, []);
+
   const canRun = useMemo(() => {
     if (needsPath(target)) {
       return Boolean(activeFilePath);

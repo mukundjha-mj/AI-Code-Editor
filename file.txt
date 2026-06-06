@@ -1,185 +1,188 @@
-Implement Part 5: Explain My Codebase Engine.
+Implement Part 6: Visual Graph Engine.
 
 Current Status:
 
 * Foundation Layer complete.
 * AI Infrastructure complete.
-* Repository Intelligence Engine complete.
+* Repository Intelligence complete.
 * Monaco Workspace complete.
-* Groq integration architecture exists.
-* Repository metadata is available.
-* AST parsing and dependency graph exist.
+* Explain My Codebase complete.
+
+Repository intelligence already provides:
+
+* Files
+* Symbols
+* Dependencies
+* Component relationships
+* Route metadata
+* Context retrieval
 
 Objective:
 
-Build the first real AI-powered feature:
+Build an interactive visual graph system that allows users to understand repository structure visually.
 
-Explain My Codebase.
-
-The system should explain code using repository intelligence + AI.
-
-Do not implement code modification features yet.
+Do not implement Intent Mode yet.
 
 Requirements:
 
-1. Explanation Service
+1. Graph Engine
 
-Create a dedicated explanation engine.
-
-The explanation engine must use:
-
-* Repository metadata
-* Symbol index
-* Dependency graph
-* Component relationships
-* Route metadata
-* Context retrieval layer
-* Groq AI infrastructure
-
-The LLM should not receive raw repository dumps.
-
-Always provide structured repository context.
-
-2. Explanation Types
+Create a graph visualization infrastructure.
 
 Support:
 
-* File explanation
-* Component explanation
-* Function explanation
-* Class explanation
-* Module explanation
-* Route explanation
+* Nodes
+* Edges
+* Groups
+* Clusters
+* Layouts
 
-Each explanation type should have its own strategy.
+The graph engine should be reusable for multiple graph types.
 
-3. Repository Context Builder
+2. Graph Types
 
-Build context assembly logic.
+Support the following views:
 
-Collect:
-
-* Selected file
-* Related files
-* Imports
-* Exports
-* Dependencies
-* Consumers
-* Parent components
-* Child components
-
-Limit context intelligently.
-
-Avoid sending unnecessary files.
-
-4. Explanation API
-
-Create endpoints:
-
-POST /api/v1/explain/file
-POST /api/v1/explain/component
-POST /api/v1/explain/function
-POST /api/v1/explain/module
-POST /api/v1/explain/route
-
-Input should identify the selected entity.
-
-Response should contain:
-
-* Summary
-* Responsibilities
-* Dependencies
-* Relationships
-* Risks
-* Suggested reading order
-
-5. Frontend Explain Panel
-
-Create a dedicated explain panel.
-
-User can:
-
-* Select file
-* Select symbol
-* Request explanation
+A. File Graph
 
 Display:
 
-* Summary
-* Dependencies
-* Related files
-* AI explanation
+* Files
+* Imports
+* Exports
+* Dependency relationships
 
-Panel should work beside Monaco Editor.
+Questions answered:
 
-6. Symbol Awareness
+* What imports this file?
+* What does this file depend on?
 
-Allow users to:
+B. Component Graph
 
-* Click component
-* Click function
-* Click class
+Display:
 
-Trigger explanation for the selected symbol.
+* Parent components
+* Child components
+* Shared components
 
-Use repository intelligence data.
+Questions answered:
 
-7. Explanation Caching
+* Which component renders this?
+* What does this component render?
 
-Cache explanations.
+C. Route Graph
 
-Cache key should include:
+Display:
 
-* File path
-* Symbol
-* File modification state
+* Routes
+* Entry points
+* Feature boundaries
 
-Prevent repeated AI calls.
+Questions answered:
 
-8. Explanation Modes
+* How is navigation structured?
+
+D. Module Graph
+
+Display:
+
+* Modules
+* Services
+* Shared layers
+
+Questions answered:
+
+* What systems communicate with each other?
+
+3. Graph Data Layer
+
+Create graph transformation services.
+
+Convert repository intelligence data into graph models.
+
+Do not expose raw repository structures directly to the UI.
+
+4. Interactive Navigation
 
 Support:
 
-* Quick Explain
-* Deep Explain
+* Zoom
+* Pan
+* Node selection
+* Edge selection
+* Focus mode
+* Search
 
-Quick:
+5. Monaco Integration
 
-* Fast
-* Limited context
+Clicking a graph node should:
 
-Deep:
+* Open file
+* Open component
+* Focus symbol
 
-* More context
-* Cross-file reasoning
+6. Explain Integration
 
-9. Streaming
+Users should be able to:
 
-Use Groq streaming support.
+* Select graph node
+* Open Explain panel
 
-Display explanation progressively.
+The graph becomes a navigation layer for explanations.
+
+7. Graph API
+
+Create endpoints:
+
+GET /api/v1/graph/files
+GET /api/v1/graph/components
+GET /api/v1/graph/routes
+GET /api/v1/graph/modules
+
+Return graph-ready data.
+
+8. Large Repository Support
+
+Support:
+
+* Thousands of files
+* Graph filtering
+* Node collapsing
+* Lazy graph loading
+
+Avoid rendering entire repositories at once.
+
+9. UI Layout
+
+Create a dedicated Graph Workspace.
+
+Support:
+
+* Graph panel
+* Detail panel
+* Explain integration
+* Monaco integration
 
 10. Important Constraints
 
 Do not implement:
 
 * Intent Mode
-* Code Editing AI
-* Code Generation
 * Decision Memory
-* Architecture Graph UI
+* AI Code Editing
 * AI Refactoring
+* AI Patch Generation
 
-Focus only on understanding and explaining.
+This phase focuses only on visual understanding.
 
 Goal:
 
-The user should be able to click any file, component, class, route, or function and immediately understand:
+A user should be able to visually explore:
 
-* What it does
-* Why it exists
-* How it connects to the system
-* What depends on it
-* What could break if it changes
+* Repository architecture
+* Dependencies
+* Components
+* Routes
+* Relationships
 
-using repository intelligence combined with Groq-powered reasoning.
+without reading raw code.

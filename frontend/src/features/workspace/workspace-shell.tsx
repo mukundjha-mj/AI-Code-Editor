@@ -3,11 +3,13 @@ import { MonacoDiffViewer } from "../diff-viewer/monaco-diff-viewer";
 import { MonacoWorkspaceEditor } from "../editor/monaco-editor";
 import { ExplainPanel } from "../explanations";
 import { FileExplorerPanel } from "../explorer/file-explorer-panel";
+import { GraphWorkspace } from "../graph";
 import { useWorkspace } from "./workspace.hook";
 
 export const WorkspaceShell = () => {
   const [projectPathInput, setProjectPathInput] = useState("");
   const [diffMode, setDiffMode] = useState(false);
+  const [showGraphWorkspace, setShowGraphWorkspace] = useState(false);
   const {
     state,
     hasUnsavedChanges,
@@ -97,6 +99,19 @@ export const WorkspaceShell = () => {
         >
           {diffMode ? "Editor" : "Diff"}
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            setShowGraphWorkspace((current) => !current);
+          }}
+          className={`rounded border px-3 py-1 text-xs ${
+            showGraphWorkspace
+              ? "border-cyan-500/60 bg-cyan-500/20 text-cyan-100"
+              : "border-slate-700 text-slate-200"
+          }`}
+        >
+          {showGraphWorkspace ? "Code Workspace" : "Graph Workspace"}
+        </button>
       </header>
 
       <div className="flex h-9 items-center gap-1 border-b border-slate-800 bg-slate-900 px-2">
@@ -159,7 +174,13 @@ export const WorkspaceShell = () => {
               {state.error}
             </div>
           ) : null}
-          {!activePath || !activeDocument ? (
+          {showGraphWorkspace ? (
+            <GraphWorkspace
+              onOpenFile={async (path) => {
+                await openFile(path);
+              }}
+            />
+          ) : !activePath || !activeDocument ? (
             <div className="flex h-full items-center justify-center text-sm text-slate-500">
               Open a file from explorer to start editing.
             </div>
