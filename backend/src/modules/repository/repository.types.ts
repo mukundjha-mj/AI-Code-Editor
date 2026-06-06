@@ -6,6 +6,8 @@ export const SUPPORTED_EXTENSIONS = [
   ".mjs",
   ".cjs",
   ".json",
+  ".md",
+  ".markdown",
 ] as const;
 
 export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];

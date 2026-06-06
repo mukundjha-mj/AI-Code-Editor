@@ -142,8 +142,23 @@ export class AstParser {
     if (extension === ".json") {
       return this.parseJson(filePath, content);
     }
+    if (extension === ".md" || extension === ".markdown") {
+      return this.parseText();
+    }
 
     return this.parseScript(filePath, extension, content);
+  }
+
+  private parseText(): ParsedFileMetadata {
+    return {
+      symbols: [],
+      imports: [],
+      exports: [],
+      componentDefinitions: [],
+      componentUsages: [],
+      discoveredRoutes: [],
+      isEntryPoint: false,
+    };
   }
 
   private parseJson(filePath: string, content: string): ParsedFileMetadata {

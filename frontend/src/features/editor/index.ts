@@ -1,1 +1,1 @@
-export {};
+export { MonacoWorkspaceEditor } from "./monaco-editor";

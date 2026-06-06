@@ -1,4 +1,5 @@
 import path from "node:path";
+import { promises as fs } from "node:fs";
 import { AstParser } from "./ast-parser";
 import {
   InMemoryRepositoryMetadataStore,
@@ -30,6 +31,7 @@ const resolveDefaultRoot = () => {
 };
 
 const toPosix = (value: string) => value.split(path.sep).join("/");
+const fromPosix = (value: string) => value.split("/").join(path.sep);
 
 const normalizeRootPath = (inputPath?: string) => {
   if (!inputPath || inputPath.trim().length === 0) {
@@ -231,6 +233,32 @@ export class RepositoryIntelligenceService {
     };
   }
 
+  async getFileContent(filePath: string) {
+    const normalizedPath = this.normalizeRelativePath(filePath);
+    const rootPath = this.requireScannedRootPath();
+    const absolutePath = this.resolveFileAbsolutePath(rootPath, normalizedPath);
+    const content = await this.scanner.readFile(absolutePath);
+    const stat = await fs.stat(absolutePath);
+
+    return {
+      path: normalizedPath,
+      content,
+      hash: this.scanner.computeHash(content),
+      mtimeMs: stat.mtimeMs,
+    };
+  }
+
+  async saveFileContent(filePath: string, content: string) {
+    const normalizedPath = this.normalizeRelativePath(filePath);
+    const rootPath = this.requireScannedRootPath();
+    const absolutePath = this.resolveFileAbsolutePath(rootPath, normalizedPath);
+
+    await fs.writeFile(absolutePath, content, "utf-8");
+    await this.handleFileChange(rootPath, normalizedPath);
+
+    return this.getFileContent(normalizedPath);
+  }
+
   getRelatedFiles(filePath: string) {
     const snapshot = this.getSnapshot();
     const outgoing = new Set(snapshot.dependencies.adjacency[filePath] ?? []);
@@ -349,6 +377,46 @@ export class RepositoryIntelligenceService {
 
     this.rebuildDerivedIndexes();
     this.store.setScannedAt(new Date().toISOString());
+  }
+
+  private requireScannedRootPath(): string {
+    const rootPath = this.store.getRootPath();
+    if (!rootPath) {
+      throw new Error("Repository not scanned. Scan a project before opening files.");
+    }
+    return rootPath;
+  }
+
+  private normalizeRelativePath(inputPath: string): string {
+    const normalized = inputPath.trim().split(path.win32.sep).join(path.posix.sep);
+    const relativePath = path.posix.normalize(normalized);
+    if (
+      relativePath.length === 0 ||
+      relativePath === "." ||
+      relativePath.startsWith("../") ||
+      relativePath.startsWith("/") ||
+      path.posix.isAbsolute(relativePath)
+    ) {
+      throw new Error(`Invalid repository path: ${inputPath}`);
+    }
+    return relativePath;
+  }
+
+  private resolveFileAbsolutePath(rootPath: string, relativePath: string): string {
+    const absolutePath = path.resolve(rootPath, fromPosix(relativePath));
+    const relativeToRoot = path.relative(rootPath, absolutePath);
+    const escapesRoot =
+      relativeToRoot.length === 0
+        ? false
+        : relativeToRoot === ".." ||
+          relativeToRoot.startsWith(`..${path.sep}`) ||
+          path.isAbsolute(relativeToRoot);
+
+    if (escapesRoot) {
+      throw new Error(`Path escapes repository root: ${relativePath}`);
+    }
+
+    return absolutePath;
   }
 
   private rebuildDerivedIndexes(): void {

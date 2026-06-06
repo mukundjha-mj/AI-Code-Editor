@@ -1,185 +1,172 @@
-Implement Part 3: Repository Intelligence Engine.
+Implement Part 4: Monaco Workspace Layer.
 
 Current Status:
 
-* Monorepo foundation is complete.
-* AI infrastructure layer is complete.
-* Groq integration architecture exists.
-* Mock AI endpoints exist.
-* No code intelligence features exist yet.
+* Foundation Layer complete.
+* AI Infrastructure complete.
+* Repository Intelligence Engine complete.
+* Backend APIs are operational.
+* Frontend currently contains only the base React application.
 
 Objective:
-Build the repository intelligence engine that understands and indexes the codebase.
+
+Build the editor workspace infrastructure using Monaco Editor.
+
+This phase focuses only on editor functionality and workspace management.
+
+Do not implement AI-assisted editing yet.
 
 Requirements:
 
-1. Repository Scanner
+1. Monaco Editor Integration
 
-Create a repository scanning system that can:
+Install and configure Monaco Editor.
 
-* Scan entire projects
-* Detect files and folders
-* Watch for file changes
-* Re-index modified files
-* Support large repositories
+Create a reusable editor module.
 
-Prepare support for:
+Support:
 
-* React
 * TypeScript
 * JavaScript
-* Node.js
-* JSON files
+* TSX
+* JSX
+* JSON
+* Markdown
 
-Do not implement language-specific intelligence outside supported technologies.
+Prepare architecture for future language extensions.
 
-2. AST Parsing Layer
+2. Workspace System
 
-Create an AST-based parsing system.
+Create workspace management.
 
-Extract:
+Support:
 
-* Functions
-* Components
-* Classes
-* Interfaces
-* Types
-* Variables
-* Exports
-* Imports
+* Opening projects
+* Opening files
+* Closing files
+* Active file tracking
+* Multiple tabs
+* Unsaved changes tracking
 
-Do not use regex-based analysis.
+Maintain workspace state globally.
 
-Use proper AST parsing.
+3. File Loading
 
-3. Symbol Index
+Connect frontend to repository APIs.
 
-Create a centralized symbol registry.
+Support:
+
+* File tree loading
+* Folder expansion
+* File selection
+* File content loading
+
+Do not use mock data.
+
+Use repository endpoints.
+
+4. File Editing
+
+Support:
+
+* Editing files
+* Save file
+* Save all files
+* Detect unsaved changes
+* Reload file from disk
+
+Prepare for future conflict handling.
+
+5. Editor State Management
 
 Track:
 
-* Symbol name
-* Symbol type
-* Source file
-* Export status
-* Relationships
+* Cursor position
+* Selections
+* Open tabs
+* Scroll position
+* Active editor
 
-Support future lookup by:
+Persist editor state locally.
 
-* Name
-* File
-* Type
+6. File Explorer
 
-4. Dependency Graph Engine
+Create a file explorer panel.
 
-Build a graph system that tracks:
+Support:
 
-* File imports
-* File exports
-* Internal dependencies
-* Cross-module relationships
+* Folder tree
+* Expand/collapse
+* Search files
+* Active file highlighting
 
-Detect:
+Use repository intelligence data.
 
-* Circular dependencies
-* Orphan files
-* High-dependency files
+7. Diff Viewer
 
-Store graph relationships in a structured format.
+Configure Monaco diff editor.
 
-5. Component Relationship Engine
+Support:
 
-For React projects, track:
+* Original file
+* Modified file
+* Change visualization
 
-* Parent components
-* Child components
-* Shared components
-* Component usage
+Prepare for future AI patch review.
 
-Prepare data structures for visualization later.
+8. Editor Events Layer
 
-Do not build UI yet.
+Create a centralized event system.
 
-6. Route Discovery
+Track:
 
-Automatically discover:
+* File opened
+* File closed
+* File saved
+* Selection changed
+* Cursor changed
+* Content changed
 
-* React routes
-* Application entry points
-* Feature boundaries
+Future AI modules will subscribe to these events.
 
-Prepare metadata for future architecture visualization.
+9. Frontend Architecture
 
-7. Repository Metadata Store
+Create dedicated modules for:
 
-Create storage structures for:
+* Workspace
+* Editor
+* File Explorer
+* Diff Viewer
+* Editor State
+* Editor Events
 
-* Files
-* Symbols
-* Dependencies
-* Components
-* Routes
-
-Keep storage abstracted.
-
-Future database integration will come later.
-
-8. Context Retrieval Engine
-
-Create services capable of retrieving:
-
-* Related files
-* Related symbols
-* Dependency chains
-* Component trees
-
-Do not connect retrieval to AI yet.
-
-Only build the retrieval infrastructure.
-
-9. Repository Analysis API
-
-Create API endpoints:
-
-POST /api/v1/repository/scan
-GET /api/v1/repository/files
-GET /api/v1/repository/symbols
-GET /api/v1/repository/dependencies
-GET /api/v1/repository/components
-
-These endpoints should return real repository intelligence data.
+Keep modules independent.
 
 10. Performance Requirements
 
-* Incremental indexing
-* Avoid full rescans whenever possible
-* Designed for repositories with thousands of files
-* Modular architecture
-* Future support for background indexing workers
+Support:
+
+* Large files
+* Many open tabs
+* Lazy loading
+* Virtualized file tree
+
+Avoid unnecessary re-renders.
 
 11. Important Constraints
 
 Do not implement:
 
-* Monaco Editor
-* Explain My Codebase
+* AI Chat
 * Intent Mode
+* Explain My Codebase
 * Decision Memory
-* Vector Database
-* Embeddings
-* Chat Features
-* AI Prompt Execution
+* Code Generation
+* AI Suggestions
+* Inline Completions
 
-This layer must focus exclusively on repository understanding.
+This phase is strictly about editor infrastructure.
 
 Goal:
 
-Create a repository intelligence engine that can answer questions such as:
-
-* What files exist?
-* What symbols exist?
-* What imports what?
-* Which component depends on which?
-* What would break if a file changes?
-
-without involving any LLM.
+Create a professional code editor experience similar to VS Code's core editing workflow, powered by Monaco Editor and connected to the repository intelligence backend.
