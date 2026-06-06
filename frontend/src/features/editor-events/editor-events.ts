@@ -5,6 +5,7 @@ export type EditorEventMap = {
   selectionChanged: { path: string; selection: SerializedSelection | null };
   cursorChanged: { path: string; lineNumber: number; column: number };
   contentChanged: { path: string; isDirty: boolean };
+  symbolSelected: { path: string; symbol: string };
 };
 
 export interface SerializedSelection {

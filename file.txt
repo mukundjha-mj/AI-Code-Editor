@@ -1,172 +1,185 @@
-Implement Part 4: Monaco Workspace Layer.
+Implement Part 5: Explain My Codebase Engine.
 
 Current Status:
 
 * Foundation Layer complete.
 * AI Infrastructure complete.
 * Repository Intelligence Engine complete.
-* Backend APIs are operational.
-* Frontend currently contains only the base React application.
+* Monaco Workspace complete.
+* Groq integration architecture exists.
+* Repository metadata is available.
+* AST parsing and dependency graph exist.
 
 Objective:
 
-Build the editor workspace infrastructure using Monaco Editor.
+Build the first real AI-powered feature:
 
-This phase focuses only on editor functionality and workspace management.
+Explain My Codebase.
 
-Do not implement AI-assisted editing yet.
+The system should explain code using repository intelligence + AI.
+
+Do not implement code modification features yet.
 
 Requirements:
 
-1. Monaco Editor Integration
+1. Explanation Service
 
-Install and configure Monaco Editor.
+Create a dedicated explanation engine.
 
-Create a reusable editor module.
+The explanation engine must use:
 
-Support:
+* Repository metadata
+* Symbol index
+* Dependency graph
+* Component relationships
+* Route metadata
+* Context retrieval layer
+* Groq AI infrastructure
 
-* TypeScript
-* JavaScript
-* TSX
-* JSX
-* JSON
-* Markdown
+The LLM should not receive raw repository dumps.
 
-Prepare architecture for future language extensions.
+Always provide structured repository context.
 
-2. Workspace System
-
-Create workspace management.
-
-Support:
-
-* Opening projects
-* Opening files
-* Closing files
-* Active file tracking
-* Multiple tabs
-* Unsaved changes tracking
-
-Maintain workspace state globally.
-
-3. File Loading
-
-Connect frontend to repository APIs.
+2. Explanation Types
 
 Support:
 
-* File tree loading
-* Folder expansion
-* File selection
-* File content loading
+* File explanation
+* Component explanation
+* Function explanation
+* Class explanation
+* Module explanation
+* Route explanation
 
-Do not use mock data.
+Each explanation type should have its own strategy.
 
-Use repository endpoints.
+3. Repository Context Builder
 
-4. File Editing
+Build context assembly logic.
 
-Support:
+Collect:
 
-* Editing files
-* Save file
-* Save all files
-* Detect unsaved changes
-* Reload file from disk
+* Selected file
+* Related files
+* Imports
+* Exports
+* Dependencies
+* Consumers
+* Parent components
+* Child components
 
-Prepare for future conflict handling.
+Limit context intelligently.
 
-5. Editor State Management
+Avoid sending unnecessary files.
 
-Track:
+4. Explanation API
 
-* Cursor position
-* Selections
-* Open tabs
-* Scroll position
-* Active editor
+Create endpoints:
 
-Persist editor state locally.
+POST /api/v1/explain/file
+POST /api/v1/explain/component
+POST /api/v1/explain/function
+POST /api/v1/explain/module
+POST /api/v1/explain/route
 
-6. File Explorer
+Input should identify the selected entity.
 
-Create a file explorer panel.
+Response should contain:
 
-Support:
+* Summary
+* Responsibilities
+* Dependencies
+* Relationships
+* Risks
+* Suggested reading order
 
-* Folder tree
-* Expand/collapse
-* Search files
-* Active file highlighting
+5. Frontend Explain Panel
+
+Create a dedicated explain panel.
+
+User can:
+
+* Select file
+* Select symbol
+* Request explanation
+
+Display:
+
+* Summary
+* Dependencies
+* Related files
+* AI explanation
+
+Panel should work beside Monaco Editor.
+
+6. Symbol Awareness
+
+Allow users to:
+
+* Click component
+* Click function
+* Click class
+
+Trigger explanation for the selected symbol.
 
 Use repository intelligence data.
 
-7. Diff Viewer
+7. Explanation Caching
 
-Configure Monaco diff editor.
+Cache explanations.
 
-Support:
+Cache key should include:
 
-* Original file
-* Modified file
-* Change visualization
+* File path
+* Symbol
+* File modification state
 
-Prepare for future AI patch review.
+Prevent repeated AI calls.
 
-8. Editor Events Layer
-
-Create a centralized event system.
-
-Track:
-
-* File opened
-* File closed
-* File saved
-* Selection changed
-* Cursor changed
-* Content changed
-
-Future AI modules will subscribe to these events.
-
-9. Frontend Architecture
-
-Create dedicated modules for:
-
-* Workspace
-* Editor
-* File Explorer
-* Diff Viewer
-* Editor State
-* Editor Events
-
-Keep modules independent.
-
-10. Performance Requirements
+8. Explanation Modes
 
 Support:
 
-* Large files
-* Many open tabs
-* Lazy loading
-* Virtualized file tree
+* Quick Explain
+* Deep Explain
 
-Avoid unnecessary re-renders.
+Quick:
 
-11. Important Constraints
+* Fast
+* Limited context
+
+Deep:
+
+* More context
+* Cross-file reasoning
+
+9. Streaming
+
+Use Groq streaming support.
+
+Display explanation progressively.
+
+10. Important Constraints
 
 Do not implement:
 
-* AI Chat
 * Intent Mode
-* Explain My Codebase
-* Decision Memory
+* Code Editing AI
 * Code Generation
-* AI Suggestions
-* Inline Completions
+* Decision Memory
+* Architecture Graph UI
+* AI Refactoring
 
-This phase is strictly about editor infrastructure.
+Focus only on understanding and explaining.
 
 Goal:
 
-Create a professional code editor experience similar to VS Code's core editing workflow, powered by Monaco Editor and connected to the repository intelligence backend.
+The user should be able to click any file, component, class, route, or function and immediately understand:
+
+* What it does
+* Why it exists
+* How it connects to the system
+* What depends on it
+* What could break if it changes
+
+using repository intelligence combined with Groq-powered reasoning.

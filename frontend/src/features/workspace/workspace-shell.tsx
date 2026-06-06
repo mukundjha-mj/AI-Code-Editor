@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { MonacoDiffViewer } from "../diff-viewer/monaco-diff-viewer";
 import { MonacoWorkspaceEditor } from "../editor/monaco-editor";
+import { ExplainPanel } from "../explanations";
 import { FileExplorerPanel } from "../explorer/file-explorer-panel";
 import { useWorkspace } from "./workspace.hook";
 
@@ -139,7 +140,7 @@ export const WorkspaceShell = () => {
         )}
       </div>
 
-      <section className="grid min-h-0 grid-cols-[320px_1fr]">
+      <section className="grid min-h-0 grid-cols-1 lg:grid-cols-[320px_1fr_380px]">
         <FileExplorerPanel
           files={state.files}
           folders={state.folders}
@@ -182,6 +183,11 @@ export const WorkspaceShell = () => {
             />
           )}
         </div>
+        <ExplainPanel
+          activeFilePath={state.activeFilePath}
+          symbols={state.symbols}
+          routes={state.routes}
+        />
       </section>
     </main>
   );

@@ -1,8 +1,8 @@
 import type { Router } from "express";
-import { RepositoryIntelligenceService } from "./repository-intelligence.service";
 import { createRepositoryRouter } from "./repository.routes";
+import { getRepositoryIntelligenceService } from "./repository.runtime";
 
 export const createRepositoryModuleRouter = (): Router => {
-  const service = new RepositoryIntelligenceService();
+  const service = getRepositoryIntelligenceService();
   return createRepositoryRouter(service);
 };

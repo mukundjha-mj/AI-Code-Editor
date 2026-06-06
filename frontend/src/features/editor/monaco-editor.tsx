@@ -1,6 +1,7 @@
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { getMonacoLanguage } from "./monaco-languages";
 import type { EditorViewState } from "../workspace/workspace.types";
+import { editorEventBus } from "../editor-events/editor-events";
 
 interface MonacoWorkspaceEditorProps {
   filePath: string;
@@ -55,6 +56,25 @@ export const MonacoWorkspaceEditor = ({
     editor.onDidChangeCursorPosition(emitViewState);
     editor.onDidChangeCursorSelection(emitViewState);
     editor.onDidScrollChange(emitViewState);
+
+    editor.onMouseDown((event) => {
+      const position = event.target.position;
+      if (!position) {
+        return;
+      }
+      const model = editor.getModel();
+      if (!model) {
+        return;
+      }
+      const word = model.getWordAtPosition(position);
+      if (!word?.word) {
+        return;
+      }
+      editorEventBus.emit("symbolSelected", {
+        path: filePath,
+        symbol: word.word,
+      });
+    });
   };
 
   return (

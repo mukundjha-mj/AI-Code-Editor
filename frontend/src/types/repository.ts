@@ -32,3 +32,33 @@ export interface RepositoryFileContentResponse {
   hash: string;
   mtimeMs: number;
 }
+
+export interface RepositorySymbol {
+  id: string;
+  name: string;
+  type: "function" | "component" | "class" | "interface" | "type" | "variable";
+  sourceFile: string;
+  isExported: boolean;
+  relationships: string[];
+}
+
+export interface RepositorySymbolsResponse {
+  rootPath: string | null;
+  scannedAt: string | null;
+  symbols: RepositorySymbol[];
+}
+
+export interface RepositoryComponentsResponse {
+  rootPath: string | null;
+  scannedAt: string | null;
+  components: {
+    parentToChildren: Record<string, string[]>;
+    componentUsageCount: Record<string, number>;
+    sharedComponents: string[];
+  };
+  routes: {
+    routes: Array<{ file: string; route: string }>;
+    entryPoints: string[];
+    featureBoundaries: string[];
+  };
+}

@@ -7,8 +7,10 @@ import {
   type PropsWithChildren,
 } from "react";
 import {
+  getRepositoryComponents,
   getRepositoryFileContent,
   getRepositoryFiles,
+  getRepositorySymbols,
   saveRepositoryFileContent,
   scanRepository,
 } from "../../services/repository-api";
@@ -29,6 +31,8 @@ const createInitialState = (): WorkspaceState => {
     scannedAt: null,
     files: [],
     folders: [],
+    symbols: [],
+    routes: [],
     openTabs: persisted?.openTabs ?? [],
     activeFilePath: persisted?.activeFilePath ?? null,
     documents: {},
@@ -45,7 +49,15 @@ const createInitialState = (): WorkspaceState => {
 type WorkspaceAction =
   | { type: "project/loading"; payload: boolean }
   | { type: "project/set"; payload: { rootPath: string | null; scannedAt: string | null } }
-  | { type: "files/set"; payload: { files: RepositoryFileRecord[]; folders: string[] } }
+  | {
+      type: "files/set";
+      payload: {
+        files: RepositoryFileRecord[];
+        folders: string[];
+        symbols: WorkspaceState["symbols"];
+        routes: WorkspaceState["routes"];
+      };
+    }
   | { type: "error/set"; payload: string | null }
   | { type: "search/set"; payload: string }
   | { type: "folder/toggle"; payload: string }
@@ -76,6 +88,8 @@ const workspaceReducer = (state: WorkspaceState, action: WorkspaceAction): Works
         ...state,
         files: action.payload.files,
         folders: action.payload.folders,
+        symbols: action.payload.symbols,
+        routes: action.payload.routes,
       };
     case "error/set":
       return {
@@ -201,7 +215,11 @@ export const WorkspaceProvider = ({ children }: PropsWithChildren) => {
   );
 
   const syncFiles = useCallback(async () => {
-    const payload = await getRepositoryFiles();
+    const [payload, symbolsPayload, componentsPayload] = await Promise.all([
+      getRepositoryFiles(),
+      getRepositorySymbols(),
+      getRepositoryComponents(),
+    ]);
     dispatch({
       type: "project/set",
       payload: {
@@ -214,6 +232,8 @@ export const WorkspaceProvider = ({ children }: PropsWithChildren) => {
       payload: {
         files: payload.files,
         folders: payload.folders,
+        symbols: symbolsPayload.symbols,
+        routes: componentsPayload.routes.routes,
       },
     });
   }, []);

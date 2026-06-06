@@ -1,4 +1,5 @@
 import type { RepositoryFileRecord } from "../../types/repository";
+import type { RepositorySymbol } from "../../types/repository";
 import type { SerializedSelection } from "../editor-events/editor-events";
 import type { StoredEditorViewState } from "../editor-state/editor-state.persistence";
 
@@ -24,6 +25,8 @@ export interface WorkspaceState {
   scannedAt: string | null;
   files: RepositoryFileRecord[];
   folders: string[];
+  symbols: RepositorySymbol[];
+  routes: Array<{ file: string; route: string }>;
   openTabs: string[];
   activeFilePath: string | null;
   documents: Record<string, WorkspaceDocument>;

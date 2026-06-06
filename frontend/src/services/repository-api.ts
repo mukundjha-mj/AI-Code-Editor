@@ -1,7 +1,9 @@
 import type {
+  RepositoryComponentsResponse,
   RepositoryFileContentResponse,
   RepositoryFilesResponse,
   RepositoryScanResponse,
+  RepositorySymbolsResponse,
 } from "../types/repository";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
@@ -45,6 +47,12 @@ export const getRepositoryFiles = async (): Promise<RepositoryFilesResponse> =>
 
 export const getRepositoryFileContent = async (filePath: string): Promise<RepositoryFileContentResponse> =>
   request<RepositoryFileContentResponse>(`/file?path=${encodeURIComponent(filePath)}`);
+
+export const getRepositorySymbols = async (): Promise<RepositorySymbolsResponse> =>
+  request<RepositorySymbolsResponse>("/symbols");
+
+export const getRepositoryComponents = async (): Promise<RepositoryComponentsResponse> =>
+  request<RepositoryComponentsResponse>("/components");
 
 export const saveRepositoryFileContent = async (
   filePath: string,
