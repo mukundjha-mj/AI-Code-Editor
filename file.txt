@@ -1,0 +1,185 @@
+Implement Part 3: Repository Intelligence Engine.
+
+Current Status:
+
+* Monorepo foundation is complete.
+* AI infrastructure layer is complete.
+* Groq integration architecture exists.
+* Mock AI endpoints exist.
+* No code intelligence features exist yet.
+
+Objective:
+Build the repository intelligence engine that understands and indexes the codebase.
+
+Requirements:
+
+1. Repository Scanner
+
+Create a repository scanning system that can:
+
+* Scan entire projects
+* Detect files and folders
+* Watch for file changes
+* Re-index modified files
+* Support large repositories
+
+Prepare support for:
+
+* React
+* TypeScript
+* JavaScript
+* Node.js
+* JSON files
+
+Do not implement language-specific intelligence outside supported technologies.
+
+2. AST Parsing Layer
+
+Create an AST-based parsing system.
+
+Extract:
+
+* Functions
+* Components
+* Classes
+* Interfaces
+* Types
+* Variables
+* Exports
+* Imports
+
+Do not use regex-based analysis.
+
+Use proper AST parsing.
+
+3. Symbol Index
+
+Create a centralized symbol registry.
+
+Track:
+
+* Symbol name
+* Symbol type
+* Source file
+* Export status
+* Relationships
+
+Support future lookup by:
+
+* Name
+* File
+* Type
+
+4. Dependency Graph Engine
+
+Build a graph system that tracks:
+
+* File imports
+* File exports
+* Internal dependencies
+* Cross-module relationships
+
+Detect:
+
+* Circular dependencies
+* Orphan files
+* High-dependency files
+
+Store graph relationships in a structured format.
+
+5. Component Relationship Engine
+
+For React projects, track:
+
+* Parent components
+* Child components
+* Shared components
+* Component usage
+
+Prepare data structures for visualization later.
+
+Do not build UI yet.
+
+6. Route Discovery
+
+Automatically discover:
+
+* React routes
+* Application entry points
+* Feature boundaries
+
+Prepare metadata for future architecture visualization.
+
+7. Repository Metadata Store
+
+Create storage structures for:
+
+* Files
+* Symbols
+* Dependencies
+* Components
+* Routes
+
+Keep storage abstracted.
+
+Future database integration will come later.
+
+8. Context Retrieval Engine
+
+Create services capable of retrieving:
+
+* Related files
+* Related symbols
+* Dependency chains
+* Component trees
+
+Do not connect retrieval to AI yet.
+
+Only build the retrieval infrastructure.
+
+9. Repository Analysis API
+
+Create API endpoints:
+
+POST /api/v1/repository/scan
+GET /api/v1/repository/files
+GET /api/v1/repository/symbols
+GET /api/v1/repository/dependencies
+GET /api/v1/repository/components
+
+These endpoints should return real repository intelligence data.
+
+10. Performance Requirements
+
+* Incremental indexing
+* Avoid full rescans whenever possible
+* Designed for repositories with thousands of files
+* Modular architecture
+* Future support for background indexing workers
+
+11. Important Constraints
+
+Do not implement:
+
+* Monaco Editor
+* Explain My Codebase
+* Intent Mode
+* Decision Memory
+* Vector Database
+* Embeddings
+* Chat Features
+* AI Prompt Execution
+
+This layer must focus exclusively on repository understanding.
+
+Goal:
+
+Create a repository intelligence engine that can answer questions such as:
+
+* What files exist?
+* What symbols exist?
+* What imports what?
+* Which component depends on which?
+* What would break if a file changes?
+
+without involving any LLM.
