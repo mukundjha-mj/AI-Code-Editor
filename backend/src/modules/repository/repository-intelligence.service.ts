@@ -1,10 +1,7 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
 import { AstParser } from "./ast-parser";
-import {
-  InMemoryRepositoryMetadataStore,
-  type RepositoryMetadataStore,
-} from "./repository.store";
+import { InMemoryRepositoryMetadataStore, type RepositoryMetadataStore } from "./repository.store";
 import { RepositoryScanner } from "./repository-scanner";
 import type {
   ComponentRelationshipSummary,
@@ -77,7 +74,8 @@ const resolveImportToFile = (
   return null;
 };
 
-const uniqueSorted = (values: Iterable<string>) => [...new Set(values)].sort((a, b) => a.localeCompare(b));
+const uniqueSorted = (values: Iterable<string>) =>
+  [...new Set(values)].sort((a, b) => a.localeCompare(b));
 
 export class RepositoryIntelligenceService {
   private readonly parser: AstParser;
@@ -318,7 +316,10 @@ export class RepositoryIntelligenceService {
     const snapshot = this.getSnapshot();
     const relationships = snapshot.components.parentToChildren;
 
-    const expand = (name: string, seen = new Set<string>()): { name: string; children: unknown[] } => {
+    const expand = (
+      name: string,
+      seen = new Set<string>(),
+    ): { name: string; children: unknown[] } => {
       if (seen.has(name)) {
         return { name, children: [] };
       }
@@ -491,7 +492,8 @@ export class RepositoryIntelligenceService {
 
     const circularDependencies = this.findCircularDependencies(adjacencyObject);
     const orphanFiles = [...filePaths].filter(
-      (file) => (adjacencyObject[file]?.length ?? 0) === 0 && (incomingCountObject[file] ?? 0) === 0,
+      (file) =>
+        (adjacencyObject[file]?.length ?? 0) === 0 && (incomingCountObject[file] ?? 0) === 0,
     );
     const highDependencyFiles = [...filePaths]
       .map((file) => ({ file, incoming: incomingCountObject[file] ?? 0 }))
@@ -550,9 +552,7 @@ export class RepositoryIntelligenceService {
       }
     }
 
-    return [...cycles]
-      .sort((a, b) => a.localeCompare(b))
-      .map((cycle) => cycle.split(" -> "));
+    return [...cycles].sort((a, b) => a.localeCompare(b)).map((cycle) => cycle.split(" -> "));
   }
 
   private buildComponentRelationships(
@@ -560,7 +560,9 @@ export class RepositoryIntelligenceService {
     symbols: RepositorySymbol[],
   ): ComponentRelationshipSummary {
     const componentToFile = new Map(
-      symbols.filter((symbol) => symbol.type === "component").map((symbol) => [symbol.name, symbol.sourceFile]),
+      symbols
+        .filter((symbol) => symbol.type === "component")
+        .map((symbol) => [symbol.name, symbol.sourceFile]),
     );
 
     const parentToChildren = new Map<string, Set<string>>();
@@ -621,7 +623,9 @@ export class RepositoryIntelligenceService {
         route,
       })),
     );
-    const entryPoints = uniqueSorted(files.filter((file) => file.isEntryPoint).map((file) => file.path));
+    const entryPoints = uniqueSorted(
+      files.filter((file) => file.isEntryPoint).map((file) => file.path),
+    );
 
     const featureBoundaries = uniqueSorted(
       files

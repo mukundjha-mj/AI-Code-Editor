@@ -1,15 +1,25 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MonacoDiffViewer } from "../diff-viewer/monaco-diff-viewer";
 import { MonacoWorkspaceEditor } from "../editor/monaco-editor";
 import { ExplainPanel } from "../explanations";
 import { FileExplorerPanel } from "../explorer/file-explorer-panel";
 import { GraphWorkspace } from "../graph";
 import { useWorkspace } from "./workspace.hook";
+import { DecisionMemoryPanel } from "../decision-memory";
+import { editorEventBus } from "../editor-events/editor-events";
 
 export const WorkspaceShell = () => {
   const [projectPathInput, setProjectPathInput] = useState("");
   const [diffMode, setDiffMode] = useState(false);
   const [showGraphWorkspace, setShowGraphWorkspace] = useState(false);
+  const [activeRightTab, setActiveRightTab] = useState<"explain" | "decision-memory">("explain");
+
+  useEffect(() => {
+    const unsubscribe = editorEventBus.subscribe("decisionPanelOpen", () => {
+      setActiveRightTab("decision-memory");
+    });
+    return unsubscribe;
+  }, []);
   const {
     state,
     hasUnsavedChanges,
@@ -204,11 +214,49 @@ export const WorkspaceShell = () => {
             />
           )}
         </div>
-        <ExplainPanel
-          activeFilePath={state.activeFilePath}
-          symbols={state.symbols}
-          routes={state.routes}
-        />
+        <div className="flex h-full min-h-0 flex-col border-l border-slate-800 bg-slate-950">
+          <div className="flex border-b border-slate-800 bg-slate-900/60 p-1">
+            <button
+              type="button"
+              onClick={() => setActiveRightTab("explain")}
+              className={`flex-1 rounded py-1.5 text-center text-xs font-semibold transition ${
+                activeRightTab === "explain"
+                  ? "bg-slate-800 text-cyan-400 font-bold"
+                  : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
+              }`}
+            >
+              Explain Code
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveRightTab("decision-memory")}
+              className={`flex-1 rounded py-1.5 text-center text-xs font-semibold transition ${
+                activeRightTab === "decision-memory"
+                  ? "bg-slate-800 text-cyan-400 font-bold"
+                  : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
+              }`}
+            >
+              Decision Memory
+            </button>
+          </div>
+          <div className="min-h-0 flex-1">
+            {activeRightTab === "explain" ? (
+              <ExplainPanel
+                activeFilePath={state.activeFilePath}
+                symbols={state.symbols}
+                routes={state.routes}
+              />
+            ) : (
+              <DecisionMemoryPanel
+                activeFilePath={state.activeFilePath}
+                symbols={state.symbols}
+                onOpenFile={(path) => {
+                  void openFile(path);
+                }}
+              />
+            )}
+          </div>
+        </div>
       </section>
     </main>
   );

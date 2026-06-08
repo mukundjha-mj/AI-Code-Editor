@@ -1,5 +1,6 @@
 import type { RepositorySnapshot } from "../repository/repository.types";
 import type { RepositoryIntelligenceService } from "../repository/repository-intelligence.service";
+import type { DecisionMemoryService } from "../decision-memory/decision-memory.service";
 import type {
   GraphCluster,
   GraphEdge,
@@ -12,7 +13,8 @@ import type {
 const DEFAULT_LIMIT = 250;
 const MAX_LIMIT = 1000;
 
-const uniqueSorted = (items: Iterable<string>) => [...new Set(items)].sort((a, b) => a.localeCompare(b));
+const uniqueSorted = (items: Iterable<string>) =>
+  [...new Set(items)].sort((a, b) => a.localeCompare(b));
 
 const firstPathSegment = (pathValue: string) => pathValue.split("/").filter(Boolean)[0] ?? "(root)";
 
@@ -27,7 +29,11 @@ const nodeMatchesQuery = (node: GraphNode, query: string) => {
   if (node.label.toLowerCase().includes(query) || node.id.toLowerCase().includes(query)) {
     return true;
   }
-  return Object.values(node.metadata).some((value) => String(value ?? "").toLowerCase().includes(query));
+  return Object.values(node.metadata).some((value) =>
+    String(value ?? "")
+      .toLowerCase()
+      .includes(query),
+  );
 };
 
 const withFocusContext = (allNodes: GraphNode[], allEdges: GraphEdge[], focusNodeId?: string) => {
@@ -69,7 +75,9 @@ const pageGraph = (
   const limit = clampLimit(options.limit);
   const pagedNodes = payload.nodes.slice(offset, offset + limit);
   const pagedNodeIds = new Set(pagedNodes.map((node) => node.id));
-  const pagedEdges = payload.edges.filter((edge) => pagedNodeIds.has(edge.from) && pagedNodeIds.has(edge.to));
+  const pagedEdges = payload.edges.filter(
+    (edge) => pagedNodeIds.has(edge.from) && pagedNodeIds.has(edge.to),
+  );
   const pagedGroups = payload.groups
     .map((group) => ({
       ...group,
@@ -100,24 +108,35 @@ const pageGraph = (
 };
 
 export class GraphService {
-  constructor(private readonly repositoryService: RepositoryIntelligenceService) {}
+  constructor(
+    private readonly repositoryService: RepositoryIntelligenceService,
+    private readonly decisionMemoryService?: DecisionMemoryService,
+  ) {}
 
-  getFileGraph(options: GraphQueryOptions = {}): GraphPayload {
+  async getFileGraph(options: GraphQueryOptions = {}): Promise<GraphPayload> {
     const snapshot = this.repositoryService.getSnapshot();
-    const fileNodes: GraphNode[] = snapshot.files.map((file) => ({
-      id: `file:${file.path}`,
-      label: file.path,
-      type: "file",
-      groupId: `folder:${firstPathSegment(file.path)}`,
-      clusterId: `extension:${file.extension}`,
-      filePath: file.path,
-      metadata: {
-        extension: file.extension,
-        size: file.size,
-        imports: file.imports.length,
-        exports: file.exports.length,
-      },
-    }));
+    const decisionIndex = this.decisionMemoryService
+      ? await this.decisionMemoryService.getEntityDecisionIndex()
+      : {};
+
+    const fileNodes: GraphNode[] = snapshot.files.map((file) => {
+      const decisionCount = decisionIndex[`file:${file.path}`]?.length ?? 0;
+      return {
+        id: `file:${file.path}`,
+        label: file.path,
+        type: "file",
+        groupId: `folder:${firstPathSegment(file.path)}`,
+        clusterId: `extension:${file.extension}`,
+        filePath: file.path,
+        metadata: {
+          extension: file.extension,
+          size: file.size,
+          imports: file.imports.length,
+          exports: file.exports.length,
+          decisionCount,
+        },
+      };
+    });
     const nodeByPath = new Map(fileNodes.map((node) => [node.filePath, node] as const));
 
     const edges: GraphEdge[] = [];
@@ -160,8 +179,12 @@ export class GraphService {
     );
   }
 
-  getComponentGraph(options: GraphQueryOptions = {}): GraphPayload {
+  async getComponentGraph(options: GraphQueryOptions = {}): Promise<GraphPayload> {
     const snapshot = this.repositoryService.getSnapshot();
+    const decisionIndex = this.decisionMemoryService
+      ? await this.decisionMemoryService.getEntityDecisionIndex()
+      : {};
+
     const componentSymbolByName = new Map(
       snapshot.symbols
         .filter((symbol) => symbol.type === "component")
@@ -176,6 +199,7 @@ export class GraphService {
       const symbol = componentSymbolByName.get(componentName);
       const usage = snapshot.components.componentUsageCount[componentName] ?? 0;
       const sourceFile = symbol?.sourceFile ?? null;
+      const decisionCount = decisionIndex[`component:${componentName}`]?.length ?? 0;
       return {
         id: `component:${componentName}`,
         label: componentName,
@@ -188,6 +212,7 @@ export class GraphService {
           usageCount: usage,
           shared: usage > 1,
           sourceFile,
+          decisionCount,
         },
       };
     });
@@ -226,20 +251,28 @@ export class GraphService {
     );
   }
 
-  getRouteGraph(options: GraphQueryOptions = {}): GraphPayload {
+  async getRouteGraph(options: GraphQueryOptions = {}): Promise<GraphPayload> {
     const snapshot = this.repositoryService.getSnapshot();
-    const routeNodes: GraphNode[] = snapshot.routes.routes.map((entry) => ({
-      id: `route:${entry.route}:${entry.file}`,
-      label: entry.route,
-      type: "route",
-      groupId: `boundary:${firstPathSegment(entry.file)}`,
-      clusterId: "cluster:route",
-      filePath: entry.file,
-      route: entry.route,
-      metadata: {
-        file: entry.file,
-      },
-    }));
+    const decisionIndex = this.decisionMemoryService
+      ? await this.decisionMemoryService.getEntityDecisionIndex()
+      : {};
+
+    const routeNodes: GraphNode[] = snapshot.routes.routes.map((entry) => {
+      const decisionCount = decisionIndex[`route:${entry.route}`]?.length ?? 0;
+      return {
+        id: `route:${entry.route}:${entry.file}`,
+        label: entry.route,
+        type: "route",
+        groupId: `boundary:${firstPathSegment(entry.file)}`,
+        clusterId: "cluster:route",
+        filePath: entry.file,
+        route: entry.route,
+        metadata: {
+          file: entry.file,
+          decisionCount,
+        },
+      };
+    });
     const entryNodes: GraphNode[] = snapshot.routes.entryPoints.map((entryFile) => ({
       id: `entry:${entryFile}`,
       label: entryFile,
@@ -310,8 +343,12 @@ export class GraphService {
     );
   }
 
-  getModuleGraph(options: GraphQueryOptions = {}): GraphPayload {
+  async getModuleGraph(options: GraphQueryOptions = {}): Promise<GraphPayload> {
     const snapshot = this.repositoryService.getSnapshot();
+    const decisionIndex = this.decisionMemoryService
+      ? await this.decisionMemoryService.getEntityDecisionIndex()
+      : {};
+
     const moduleStats = new Map<string, { files: number; components: number; routes: number }>();
 
     for (const file of snapshot.files) {
@@ -325,18 +362,22 @@ export class GraphService {
 
     const nodes: GraphNode[] = [...moduleStats.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([moduleName, stats]) => ({
-        id: `module:${moduleName}`,
-        label: moduleName,
-        type: "module",
-        groupId: "modules:all",
-        clusterId: stats.files > 40 ? "cluster:large" : "cluster:normal",
-        metadata: {
-          files: stats.files,
-          components: stats.components,
-          routes: stats.routes,
-        },
-      }));
+      .map(([moduleName, stats]) => {
+        const decisionCount = decisionIndex[`module:${moduleName}`]?.length ?? 0;
+        return {
+          id: `module:${moduleName}`,
+          label: moduleName,
+          type: "module",
+          groupId: "modules:all",
+          clusterId: stats.files > 40 ? "cluster:large" : "cluster:normal",
+          metadata: {
+            files: stats.files,
+            components: stats.components,
+            routes: stats.routes,
+            decisionCount,
+          },
+        };
+      });
 
     const nodeByModule = new Map(nodes.map((node) => [node.label, node] as const));
     const edgeWeights = new Map<string, number>();
@@ -395,9 +436,13 @@ export class GraphService {
     snapshot: RepositorySnapshot,
   ) {
     const query = normalizeQuery(options.query);
-    const queryFilteredNodes = query ? nodes.filter((node) => nodeMatchesQuery(node, query)) : nodes;
+    const queryFilteredNodes = query
+      ? nodes.filter((node) => nodeMatchesQuery(node, query))
+      : nodes;
     const queryNodeIds = new Set(queryFilteredNodes.map((node) => node.id));
-    const queryFilteredEdges = edges.filter((edge) => queryNodeIds.has(edge.from) || queryNodeIds.has(edge.to));
+    const queryFilteredEdges = edges.filter(
+      (edge) => queryNodeIds.has(edge.from) || queryNodeIds.has(edge.to),
+    );
     const focused = withFocusContext(queryFilteredNodes, queryFilteredEdges, options.focusNodeId);
 
     return {

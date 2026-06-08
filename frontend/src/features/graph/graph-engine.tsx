@@ -39,9 +39,13 @@ export const GraphEngine = ({
     [graph.nodes, hiddenGroupIds],
   );
 
-  const visibleNodeIds = useMemo(() => new Set(visibleNodes.map((node) => node.id)), [visibleNodes]);
+  const visibleNodeIds = useMemo(
+    () => new Set(visibleNodes.map((node) => node.id)),
+    [visibleNodes],
+  );
   const visibleEdges = useMemo(
-    () => graph.edges.filter((edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to)),
+    () =>
+      graph.edges.filter((edge) => visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to)),
     [graph.edges, visibleNodeIds],
   );
 
@@ -49,7 +53,10 @@ export const GraphEngine = ({
     () => applyLayout(graph.layout.type, visibleNodes, visibleEdges),
     [graph.layout.type, visibleEdges, visibleNodes],
   );
-  const positionedById = useMemo(() => new Map(positionedNodes.map((node) => [node.id, node])), [positionedNodes]);
+  const positionedById = useMemo(
+    () => new Map(positionedNodes.map((node) => [node.id, node])),
+    [positionedNodes],
+  );
 
   return (
     <div
@@ -57,7 +64,9 @@ export const GraphEngine = ({
       onWheel={(event) => {
         event.preventDefault();
         const direction = event.deltaY > 0 ? -0.1 : 0.1;
-        setZoom((current) => Math.min(2.4, Math.max(0.35, Number((current + direction).toFixed(2)))));
+        setZoom((current) =>
+          Math.min(2.4, Math.max(0.35, Number((current + direction).toFixed(2)))),
+        );
       }}
       onMouseDown={(event) => {
         if (event.button !== 0) {
@@ -134,7 +143,13 @@ export const GraphEngine = ({
                 stroke={selectedNodeId === node.id ? "#22d3ee" : "#334155"}
                 strokeWidth={selectedNodeId === node.id ? 2 : 1}
               />
-              <text x={12} y={22} fill="#e2e8f0" fontSize={11} fontFamily="ui-monospace, SFMono-Regular">
+              <text
+                x={12}
+                y={22}
+                fill="#e2e8f0"
+                fontSize={11}
+                fontFamily="ui-monospace, SFMono-Regular"
+              >
                 {node.label.slice(0, 32)}
               </text>
               <text x={12} y={40} fill="#94a3b8" fontSize={10}>

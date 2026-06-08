@@ -1,4 +1,4 @@
-Implement Part 6: Visual Graph Engine.
+Implement Part 7: Decision Memory Engine.
 
 Current Status:
 
@@ -7,182 +7,193 @@ Current Status:
 * Repository Intelligence complete.
 * Monaco Workspace complete.
 * Explain My Codebase complete.
-
-Repository intelligence already provides:
-
-* Files
-* Symbols
-* Dependencies
-* Component relationships
-* Route metadata
-* Context retrieval
+* Visual Graph Engine complete.
 
 Objective:
 
-Build an interactive visual graph system that allows users to understand repository structure visually.
+Build a Decision Memory system that records and retrieves the reasoning behind code changes and architectural decisions.
+
+This system should become the long-term memory of the codebase.
 
 Do not implement Intent Mode yet.
 
 Requirements:
 
-1. Graph Engine
+1. Decision Memory Domain
 
-Create a graph visualization infrastructure.
+Create a dedicated Decision Memory module.
 
-Support:
+Store information about:
 
-* Nodes
-* Edges
-* Groups
-* Clusters
-* Layouts
+* Why code was added
+* Why code was modified
+* Why code was removed
+* Performance optimizations
+* Architectural decisions
+* Refactoring decisions
+* Bug-fix decisions
 
-The graph engine should be reusable for multiple graph types.
+The focus is reasoning, not code storage.
 
-2. Graph Types
+2. Decision Record Model
 
-Support the following views:
+Each decision should support:
 
-A. File Graph
+* Unique ID
+* Title
+* Description
+* Decision Type
+* Reason
+* Trade-offs
+* Expected Benefits
+* Risks
+* Author
+* Timestamp
 
-Display:
+Relationships:
 
 * Files
-* Imports
-* Exports
-* Dependency relationships
-
-Questions answered:
-
-* What imports this file?
-* What does this file depend on?
-
-B. Component Graph
-
-Display:
-
-* Parent components
-* Child components
-* Shared components
-
-Questions answered:
-
-* Which component renders this?
-* What does this component render?
-
-C. Route Graph
-
-Display:
-
+* Components
+* Symbols
 * Routes
-* Entry points
-* Feature boundaries
-
-Questions answered:
-
-* How is navigation structured?
-
-D. Module Graph
-
-Display:
-
 * Modules
-* Services
-* Shared layers
 
-Questions answered:
+3. Repository Linking
 
-* What systems communicate with each other?
+Connect decisions to repository intelligence.
 
-3. Graph Data Layer
+Allow decisions to be attached to:
 
-Create graph transformation services.
+* File paths
+* Functions
+* Components
+* Classes
+* Routes
 
-Convert repository intelligence data into graph models.
+Support multiple decisions per entity.
 
-Do not expose raw repository structures directly to the UI.
+4. Decision Retrieval Engine
 
-4. Interactive Navigation
+Create retrieval services that answer:
+
+* Why does this exist?
+* Why was this changed?
+* What decisions affect this component?
+* What performance optimizations exist here?
+* What architectural decisions affect this module?
+
+5. Decision Timeline
+
+Maintain historical decision chains.
 
 Support:
 
-* Zoom
-* Pan
-* Node selection
-* Edge selection
-* Focus mode
-* Search
+* Original decision
+* Follow-up decision
+* Replaced decision
+* Superseded decision
 
-5. Monaco Integration
+Track evolution of reasoning.
 
-Clicking a graph node should:
-
-* Open file
-* Open component
-* Focus symbol
-
-6. Explain Integration
-
-Users should be able to:
-
-* Select graph node
-* Open Explain panel
-
-The graph becomes a navigation layer for explanations.
-
-7. Graph API
+6. Decision APIs
 
 Create endpoints:
 
-GET /api/v1/graph/files
-GET /api/v1/graph/components
-GET /api/v1/graph/routes
-GET /api/v1/graph/modules
+POST /api/v1/decisions
+GET /api/v1/decisions
+GET /api/v1/decisions/:id
+GET /api/v1/decisions/entity
+GET /api/v1/decisions/history
 
-Return graph-ready data.
+Support filtering by:
 
-8. Large Repository Support
+* File
+* Symbol
+* Component
+* Route
+* Type
 
-Support:
+7. Frontend Decision Workspace
 
-* Thousands of files
-* Graph filtering
-* Node collapsing
-* Lazy graph loading
+Create a dedicated Decision Memory panel.
 
-Avoid rendering entire repositories at once.
+Display:
 
-9. UI Layout
+* Decision title
+* Reason
+* Trade-offs
+* Benefits
+* Risks
+* Linked entities
 
-Create a dedicated Graph Workspace.
+Support navigation to:
 
-Support:
+* Monaco Editor
+* Graph Workspace
+* Explain Panel
 
-* Graph panel
-* Detail panel
-* Explain integration
-* Monaco integration
+8. Explain Integration
 
-10. Important Constraints
+When explaining code:
+
+Include:
+
+* Related decisions
+* Architectural rationale
+* Optimization rationale
+
+Explanations should become richer when decision memory exists.
+
+9. Graph Integration
+
+Graph nodes should display:
+
+* Decision count
+* Linked decisions
+
+Users should be able to open decision details directly from graph nodes.
+
+10. Storage Layer
+
+Create an abstraction layer.
+
+Initial implementation may use:
+
+* PostgreSQL
+* Neon
+
+Design for future expansion.
+
+11. AI Support
+
+Use Groq only for:
+
+* Decision summarization
+* Decision categorization
+* Decision search enhancement
+
+Do not auto-generate decisions.
+
+Decisions should originate from users or accepted workflows.
+
+12. Important Constraints
 
 Do not implement:
 
 * Intent Mode
-* Decision Memory
 * AI Code Editing
 * AI Refactoring
 * AI Patch Generation
 
-This phase focuses only on visual understanding.
+Focus only on memory and reasoning history.
 
 Goal:
 
-A user should be able to visually explore:
+The system should be able to answer:
 
-* Repository architecture
-* Dependencies
-* Components
-* Routes
-* Relationships
+* Why was this written?
+* Why was this optimized?
+* Why was this architecture chosen?
+* What reasoning led to this implementation?
 
-without reading raw code.
+even months after the original author is gone.

@@ -51,7 +51,10 @@ const buildRows = (
     filesByFolder.set(folder, list);
   }
   for (const [folder, list] of filesByFolder) {
-    filesByFolder.set(folder, list.sort((a, b) => a.localeCompare(b)));
+    filesByFolder.set(
+      folder,
+      list.sort((a, b) => a.localeCompare(b)),
+    );
   }
 
   const search = searchQuery.trim().toLowerCase();
@@ -80,7 +83,10 @@ const buildRows = (
     childrenByFolder.set(parent, list);
   }
   for (const [parent, list] of childrenByFolder) {
-    childrenByFolder.set(parent, list.sort((a, b) => a.localeCompare(b)));
+    childrenByFolder.set(
+      parent,
+      list.sort((a, b) => a.localeCompare(b)),
+    );
   }
 
   const rows: ExplorerRow[] = [];

@@ -12,6 +12,8 @@ import {
   validateExplainInput,
   type RepositoryContextBuilder,
 } from "./repository-context.builder";
+import type { DecisionMemoryService } from "../decision-memory/decision-memory.service";
+import type { DecisionEntityType } from "../decision-memory/decision-memory.types";
 import type { ExplainRequestInput, ExplainResponse } from "./explain.types";
 
 const explanationSchema = z.object({
@@ -23,17 +25,20 @@ const explanationSchema = z.object({
   suggestedReadingOrder: z.array(z.string()).default([]),
 });
 
-const getSystemPrompt = (target: ExplainRequestInput["target"], mode: ExplainRequestInput["mode"]) =>
+const getSystemPrompt = (
+  target: ExplainRequestInput["target"],
+  mode: ExplainRequestInput["mode"],
+) =>
   [
     `You are a codebase explanation engine for ${target} analysis in ${mode} mode.`,
-    "Only use the provided repository context. Never claim unseen files.",
+    "Only use the provided repository context and engineering decisions context. Never claim unseen files.",
     "Return STRICT JSON with fields: summary, responsibilities, dependencies, relationships, risks, suggestedReadingOrder.",
     "Each list must contain concise bullet-like strings.",
   ].join(" ");
 
 const getUserPrompt = (input: ExplainRequestInput, contextText: string) =>
   [
-    "Explain the selected repository entity using the context JSON below.",
+    "Explain the selected repository entity using the context JSON and architectural decisions context below.",
     `Target: ${input.target}`,
     `Mode: ${input.mode}`,
     input.path ? `Path: ${input.path}` : "",
@@ -49,7 +54,10 @@ const getUserPrompt = (input: ExplainRequestInput, contextText: string) =>
 const parseStructuredResponse = (content: string) => {
   const normalized = content.trim();
   const json = normalized.startsWith("```")
-    ? normalized.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim()
+    ? normalized
+        .replace(/^```(?:json)?/i, "")
+        .replace(/```$/, "")
+        .trim()
     : normalized;
   const parsed = JSON.parse(json);
   return explanationSchema.parse(parsed);
@@ -68,6 +76,7 @@ interface ExplainServiceDeps {
   contextService: ContextService;
   contextBuilder: RepositoryContextBuilder;
   cache: ExplanationCache;
+  decisionMemory?: DecisionMemoryService;
 }
 
 export const createExplainService = (deps: ExplainServiceDeps): ExplainService => ({
@@ -93,7 +102,46 @@ export const createExplainService = (deps: ExplainServiceDeps): ExplainService =
     const contextRequest = deps.contextBuilder.toContextRequest(context);
     const baseContextChunks = await deps.contextService.collect(contextRequest);
     const contextText = toStructuredContextText(context);
-    const collectedText = baseContextChunks.map((chunk) => `[${chunk.scope}] ${chunk.content}`).join("\n");
+    const collectedText = baseContextChunks
+      .map((chunk) => `[${chunk.scope}] ${chunk.content}`)
+      .join("\n");
+
+    let decisionContextText = "";
+    const relatedDecisions = deps.decisionMemory
+      ? await deps.decisionMemory.getExplainSummaries({
+          filePath: input.path,
+          symbol: input.symbol,
+          route: input.route,
+          moduleName: input.target === "module" ? input.symbol : undefined,
+        })
+      : [];
+
+    if (deps.decisionMemory) {
+      const entityValue = input.symbol || input.path || input.route || "";
+      if (entityValue) {
+        try {
+          const contextResult = await deps.decisionMemory.getByEntity({
+            type: input.target as DecisionEntityType,
+            value: entityValue,
+            filePath: input.path,
+          });
+          if (contextResult.decisions.length > 0) {
+            decisionContextText =
+              "\n\nArchitectural & Performance Decisions Rationale:\n" +
+              contextResult.decisions
+                .map(
+                  (d) =>
+                    `- [${d.decisionType}] ${d.title}: ${d.reason} (Expected Benefits: ${d.expectedBenefits.join(
+                      ", ",
+                    )}, Risks: ${d.risks.join(", ")})`,
+                )
+                .join("\n");
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
 
     const response = await deps.provider.complete({
       model,
@@ -106,7 +154,9 @@ export const createExplainService = (deps: ExplainServiceDeps): ExplainService =
           role: "user",
           content: getUserPrompt(
             input,
-            [contextText, collectedText].filter((value) => value.length > 0).join("\n\n"),
+            [contextText, collectedText, decisionContextText]
+              .filter((value) => value.length > 0)
+              .join("\n\n"),
           ),
         },
       ],
@@ -126,6 +176,7 @@ export const createExplainService = (deps: ExplainServiceDeps): ExplainService =
       relatedFiles: context.relatedFiles,
       contextVersion: getContextVersion(context),
       cached: false,
+      relatedDecisions,
     };
 
     deps.cache.set(cacheKey, result);
@@ -144,7 +195,37 @@ export const createExplainService = (deps: ExplainServiceDeps): ExplainService =
     const contextRequest = deps.contextBuilder.toContextRequest(context);
     const contextChunks = await deps.contextService.collect(contextRequest);
     const contextText = toStructuredContextText(context);
-    const collectedText = contextChunks.map((chunk) => `[${chunk.scope}] ${chunk.content}`).join("\n");
+    const collectedText = contextChunks
+      .map((chunk) => `[${chunk.scope}] ${chunk.content}`)
+      .join("\n");
+
+    let decisionContextText = "";
+    if (deps.decisionMemory) {
+      const entityValue = input.symbol || input.path || input.route || "";
+      if (entityValue) {
+        try {
+          const contextResult = await deps.decisionMemory.getByEntity({
+            type: input.target as DecisionEntityType,
+            value: entityValue,
+            filePath: input.path,
+          });
+          if (contextResult.decisions.length > 0) {
+            decisionContextText =
+              "\n\nArchitectural & Performance Decisions Rationale:\n" +
+              contextResult.decisions
+                .map(
+                  (d) =>
+                    `- [${d.decisionType}] ${d.title}: ${d.reason} (Expected Benefits: ${d.expectedBenefits.join(
+                      ", ",
+                    )}, Risks: ${d.risks.join(", ")})`,
+                )
+                .join("\n");
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
 
     yield* deps.provider.stream({
       model,
@@ -159,7 +240,12 @@ export const createExplainService = (deps: ExplainServiceDeps): ExplainService =
             "Stream a concise markdown explanation using the same required sections:",
             "Summary, Responsibilities, Dependencies, Relationships, Risks, Suggested Reading Order.",
             "",
-            getUserPrompt(input, [contextText, collectedText].filter((value) => value.length > 0).join("\n\n")),
+            getUserPrompt(
+              input,
+              [contextText, collectedText, decisionContextText]
+                .filter((value) => value.length > 0)
+                .join("\n\n"),
+            ),
           ].join("\n"),
         },
       ],

@@ -33,36 +33,60 @@ const parseQuery = (req: Request, res: Response) => {
 export const createGraphRouter = (service: GraphService) => {
   const router = Router();
 
-  router.get("/files", (req: Request, res: Response) => {
+  router.get("/files", async (req: Request, res: Response) => {
     const query = parseQuery(req, res);
     if (!query) {
       return;
     }
-    res.status(200).json(service.getFileGraph(query));
+    try {
+      const result = await service.getFileGraph(query);
+      res.status(200).json(result);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to load files graph";
+      res.status(500).json({ error: msg });
+    }
   });
 
-  router.get("/components", (req: Request, res: Response) => {
+  router.get("/components", async (req: Request, res: Response) => {
     const query = parseQuery(req, res);
     if (!query) {
       return;
     }
-    res.status(200).json(service.getComponentGraph(query));
+    try {
+      const result = await service.getComponentGraph(query);
+      res.status(200).json(result);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to load components graph";
+      res.status(500).json({ error: msg });
+    }
   });
 
-  router.get("/routes", (req: Request, res: Response) => {
+  router.get("/routes", async (req: Request, res: Response) => {
     const query = parseQuery(req, res);
     if (!query) {
       return;
     }
-    res.status(200).json(service.getRouteGraph(query));
+    try {
+      const result = await service.getRouteGraph(query);
+      res.status(200).json(result);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to load routes graph";
+      res.status(500).json({ error: msg });
+    }
   });
 
-  router.get("/modules", (req: Request, res: Response) => {
+  router.get("/modules", async (req: Request, res: Response) => {
     const query = parseQuery(req, res);
     if (!query) {
       return;
     }
-    res.status(200).json(service.getModuleGraph(query));
+    try {
+      const result = await service.getModuleGraph(query);
+      res.status(200).json(result);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to load modules graph";
+      res.status(500).json({ error: msg });
+    }
   });
 
   return router;

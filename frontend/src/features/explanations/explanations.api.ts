@@ -1,3 +1,5 @@
+import type { ExplainDecisionSummary } from "../decision-memory/decision-memory.api";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
 
 export type ExplainTarget = "file" | "component" | "function" | "class" | "module" | "route";
@@ -22,6 +24,7 @@ export interface ExplainResponse {
   relatedFiles: string[];
   contextVersion: string;
   cached: boolean;
+  relatedDecisions?: ExplainDecisionSummary[];
 }
 
 const parseError = async (response: Response) => {

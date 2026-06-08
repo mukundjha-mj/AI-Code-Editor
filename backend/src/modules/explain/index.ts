@@ -11,6 +11,7 @@ import {
   createRepositoryContextService,
 } from "./repository-context.builder";
 import { getRepositoryIntelligenceService } from "../repository/repository.runtime";
+import { getDecisionMemoryService } from "../decision-memory/decision-memory.runtime";
 
 export const createExplainModuleRouter = (): Router => {
   const repository = getRepositoryIntelligenceService();
@@ -36,6 +37,7 @@ export const createExplainModuleRouter = (): Router => {
     contextService,
     contextBuilder,
     cache,
+    decisionMemory: getDecisionMemoryService(),
   });
 
   return createExplainRouter(explainService);

@@ -9,8 +9,7 @@ const aiRequestSchema = z.object({
 });
 
 const buildHandler =
-  (service: AiService, capability: AiCapability) =>
-  async (req: Request, res: Response) => {
+  (service: AiService, capability: AiCapability) => async (req: Request, res: Response) => {
     const parsed = aiRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({

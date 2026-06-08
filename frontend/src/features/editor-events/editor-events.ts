@@ -12,6 +12,11 @@ export type EditorEventMap = {
     symbol?: string;
     route?: string;
   };
+  decisionPanelOpen: {
+    type?: "file" | "symbol" | "component" | "function" | "class" | "route" | "module";
+    value?: string;
+    filePath?: string;
+  };
 };
 
 export interface SerializedSelection {

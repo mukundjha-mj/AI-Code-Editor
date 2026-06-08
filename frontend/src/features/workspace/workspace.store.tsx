@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  type PropsWithChildren,
-} from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, type PropsWithChildren } from "react";
 import {
   getRepositoryComponents,
   getRepositoryFileContent,
@@ -21,7 +14,12 @@ import {
   type StoredEditorViewState,
 } from "../editor-state/editor-state.persistence";
 import { editorEventBus } from "../editor-events/editor-events";
-import type { EditorViewState, WorkspaceDocument, WorkspaceState, WorkspaceStore } from "./workspace.types";
+import type {
+  EditorViewState,
+  WorkspaceDocument,
+  WorkspaceState,
+  WorkspaceStore,
+} from "./workspace.types";
 import { WorkspaceContext } from "./workspace.context";
 
 const createInitialState = (): WorkspaceState => {
@@ -137,7 +135,9 @@ const workspaceReducer = (state: WorkspaceState, action: WorkspaceAction): Works
       const nextDocuments = { ...state.documents };
       delete nextDocuments[action.payload];
       const nextActiveFilePath =
-        state.activeFilePath === action.payload ? nextOpenTabs[nextOpenTabs.length - 1] ?? null : state.activeFilePath;
+        state.activeFilePath === action.payload
+          ? (nextOpenTabs[nextOpenTabs.length - 1] ?? null)
+          : state.activeFilePath;
       return {
         ...state,
         openTabs: nextOpenTabs,
@@ -426,7 +426,13 @@ export const WorkspaceProvider = ({ children }: PropsWithChildren) => {
         window.clearTimeout(saveTimerRef.current);
       }
     };
-  }, [state.activeFilePath, state.expandedFolders, state.openTabs, state.rootPath, state.viewStates]);
+  }, [
+    state.activeFilePath,
+    state.expandedFolders,
+    state.openTabs,
+    state.rootPath,
+    state.viewStates,
+  ]);
 
   useEffect(() => {
     void syncFiles();

@@ -12,13 +12,7 @@ export const SUPPORTED_EXTENSIONS = [
 
 export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
 
-export type SymbolType =
-  | "function"
-  | "component"
-  | "class"
-  | "interface"
-  | "type"
-  | "variable";
+export type SymbolType = "function" | "component" | "class" | "interface" | "type" | "variable";
 
 export interface RepositorySymbol {
   id: string;

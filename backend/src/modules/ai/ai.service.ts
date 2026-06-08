@@ -96,7 +96,9 @@ export const createAiService = (deps: AiServiceDependencies): AiService => {
           { role: "system", content: prompt.systemPrompt },
           {
             role: "user",
-            content: contextBlock ? `${input.userText}\n\nContext:\n${contextBlock}` : input.userText,
+            content: contextBlock
+              ? `${input.userText}\n\nContext:\n${contextBlock}`
+              : input.userText,
           },
         ],
       });

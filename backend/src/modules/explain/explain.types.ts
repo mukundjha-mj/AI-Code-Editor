@@ -1,3 +1,5 @@
+import type { ExplainDecisionSummary } from "../decision-memory/decision-memory.types";
+
 export const explanationTargets = [
   "file",
   "component",
@@ -31,4 +33,5 @@ export interface ExplainResponse {
   relatedFiles: string[];
   contextVersion: string;
   cached: boolean;
+  relatedDecisions?: ExplainDecisionSummary[];
 }

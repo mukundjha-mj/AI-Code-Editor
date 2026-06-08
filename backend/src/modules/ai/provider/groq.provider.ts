@@ -14,9 +14,7 @@ export const createGroqProvider = (config: GroqProviderConfig): AiProvider => {
   const client = new Groq({ apiKey: config.apiKey });
 
   return {
-    complete: async (
-      request: ProviderCompletionRequest,
-    ): Promise<ProviderCompletionResponse> => {
+    complete: async (request: ProviderCompletionRequest): Promise<ProviderCompletionResponse> => {
       const completion = await client.chat.completions.create({
         model: request.model,
         messages: request.messages,

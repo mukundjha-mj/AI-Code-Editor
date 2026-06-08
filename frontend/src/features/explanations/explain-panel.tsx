@@ -36,24 +36,29 @@ export const ExplainPanel = ({ activeFilePath, symbols, routes }: ExplainPanelPr
   }, [activeFilePath, symbols]);
 
   useEffect(() => {
-    const unsubscribe = editorEventBus.subscribe("symbolSelected", ({ path, symbol: selectedSymbol }) => {
-      if (path !== activeFilePath) {
-        return;
-      }
-      const candidate = symbols.find((entry) => entry.sourceFile === path && entry.name === selectedSymbol);
-      if (!candidate) {
-        return;
-      }
+    const unsubscribe = editorEventBus.subscribe(
+      "symbolSelected",
+      ({ path, symbol: selectedSymbol }) => {
+        if (path !== activeFilePath) {
+          return;
+        }
+        const candidate = symbols.find(
+          (entry) => entry.sourceFile === path && entry.name === selectedSymbol,
+        );
+        if (!candidate) {
+          return;
+        }
 
-      setSymbol(candidate.name);
-      if (candidate.type === "component") {
-        setTarget("component");
-      } else if (candidate.type === "function") {
-        setTarget("function");
-      } else if (candidate.type === "class") {
-        setTarget("class");
-      }
-    });
+        setSymbol(candidate.name);
+        if (candidate.type === "component") {
+          setTarget("component");
+        } else if (candidate.type === "function") {
+          setTarget("function");
+        } else if (candidate.type === "class") {
+          setTarget("class");
+        }
+      },
+    );
     return unsubscribe;
   }, [activeFilePath, symbols]);
 
@@ -120,7 +125,9 @@ export const ExplainPanel = ({ activeFilePath, symbols, routes }: ExplainPanelPr
         setStreamText((current) => `${current}${token}`);
       });
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Failed to stream explanation.");
+      setError(
+        requestError instanceof Error ? requestError.message : "Failed to stream explanation.",
+      );
     } finally {
       setStreaming(false);
     }
@@ -241,7 +248,11 @@ export const ExplainPanel = ({ activeFilePath, symbols, routes }: ExplainPanelPr
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto p-3 text-xs text-slate-200">
-        {error ? <div className="mb-3 rounded border border-rose-700 bg-rose-950/40 p-2 text-rose-200">{error}</div> : null}
+        {error ? (
+          <div className="mb-3 rounded border border-rose-700 bg-rose-950/40 p-2 text-rose-200">
+            {error}
+          </div>
+        ) : null}
 
         {explainResult ? (
           <div className="space-y-3">
@@ -297,6 +308,43 @@ export const ExplainPanel = ({ activeFilePath, symbols, routes }: ExplainPanelPr
                 ))}
               </ul>
             </section>
+            {explainResult.relatedDecisions && explainResult.relatedDecisions.length > 0 ? (
+              <section className="mt-4 rounded border border-cyan-800/30 bg-cyan-950/10 p-2.5">
+                <h3 className="font-semibold text-cyan-300">Related Architectural Decisions</h3>
+                <div className="mt-2 space-y-2">
+                  {explainResult.relatedDecisions.map((decision) => (
+                    <div
+                      key={decision.id}
+                      onClick={() => {
+                        editorEventBus.emit("decisionPanelOpen", {
+                          type: target as
+                            | "file"
+                            | "symbol"
+                            | "component"
+                            | "function"
+                            | "class"
+                            | "route"
+                            | "module",
+                          value: symbol || route || activeFilePath || "",
+                          filePath: activeFilePath || undefined,
+                        });
+                      }}
+                      className="cursor-pointer rounded border border-cyan-950/60 bg-slate-900/60 p-2 hover:border-cyan-500/50 hover:bg-slate-900 transition"
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-medium text-slate-200">{decision.title}</span>
+                        <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-slate-400">
+                          {decision.decisionType}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[10px] text-slate-400 line-clamp-1">
+                        {decision.reason}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
         ) : (
           <p className="text-slate-500">Run an explanation request to see structured output.</p>
@@ -305,7 +353,9 @@ export const ExplainPanel = ({ activeFilePath, symbols, routes }: ExplainPanelPr
         {streamText.length > 0 ? (
           <section className="mt-4 border-t border-slate-800 pt-3">
             <h3 className="font-semibold text-slate-100">Streaming Output</h3>
-            <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-slate-300">{streamText}</pre>
+            <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-slate-300">
+              {streamText}
+            </pre>
           </section>
         ) : null}
       </div>

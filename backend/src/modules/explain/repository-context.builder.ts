@@ -2,10 +2,15 @@ import type { ContextService } from "../ai/context/context.service";
 import { createContextService } from "../ai/context/context.service";
 import type { ContextProvider, ContextRequest } from "../ai/context/context.types";
 import type { RepositoryIntelligenceService } from "../repository/repository-intelligence.service";
-import type { RepositoryFileRecord, RepositorySnapshot, RepositorySymbol } from "../repository/repository.types";
+import type {
+  RepositoryFileRecord,
+  RepositorySnapshot,
+  RepositorySymbol,
+} from "../repository/repository.types";
 import type { ExplainRequestInput } from "./explain.types";
 
-const uniqueSorted = (values: Iterable<string>) => [...new Set(values)].sort((a, b) => a.localeCompare(b));
+const uniqueSorted = (values: Iterable<string>) =>
+  [...new Set(values)].sort((a, b) => a.localeCompare(b));
 
 const truncateText = (value: string, max = 6000) =>
   value.length <= max ? value : `${value.slice(0, max)}\n... [truncated]`;
@@ -52,7 +57,10 @@ const inferSourceFile = (
   if (input.target === "route" && input.route) {
     return snapshot.routes.routes.find((entry) => entry.route === input.route)?.file;
   }
-  if ((input.target === "function" || input.target === "component" || input.target === "class") && input.symbol) {
+  if (
+    (input.target === "function" || input.target === "component" || input.target === "class") &&
+    input.symbol
+  ) {
     return snapshot.symbols.find((symbol) => symbol.name === input.symbol)?.sourceFile;
   }
   return undefined;
@@ -67,7 +75,9 @@ const collectSymbolContext = (
   }
   const selected = symbols.filter((symbol) => symbol.name === input.symbol);
   const sourceFile = selected[0]?.sourceFile;
-  const nearby = sourceFile ? symbols.filter((symbol) => symbol.sourceFile === sourceFile).slice(0, 30) : [];
+  const nearby = sourceFile
+    ? symbols.filter((symbol) => symbol.sourceFile === sourceFile).slice(0, 30)
+    : [];
   return { selected, nearby };
 };
 
@@ -139,15 +149,14 @@ export const createRepositoryContextBuilder = (
     const snapshot = repository.getSnapshot();
     const selectedPath = inferSourceFile(snapshot, input);
     const selectedRecord = selectedPath
-      ? snapshot.files.find((file) => file.path === selectedPath) ?? null
+      ? (snapshot.files.find((file) => file.path === selectedPath) ?? null)
       : null;
 
     const relatedFiles = selectRelatedFiles(snapshot, selectedRecord?.path, input.mode);
     const filePathsToLoad = uniqueSorted(
-      [
-        selectedRecord?.path,
-        ...relatedFiles.slice(0, input.mode === "deep" ? 8 : 3),
-      ].filter((value): value is string => Boolean(value)),
+      [selectedRecord?.path, ...relatedFiles.slice(0, input.mode === "deep" ? 8 : 3)].filter(
+        (value): value is string => Boolean(value),
+      ),
     );
 
     const files: Array<{ path: string; content: string }> = [];
@@ -284,7 +293,10 @@ export const getCacheKey = (input: ExplainRequestInput, context: ExplanationCont
   ].join("|");
 };
 
-export const validateExplainInput = (snapshot: RepositorySnapshot, input: ExplainRequestInput): string | null => {
+export const validateExplainInput = (
+  snapshot: RepositorySnapshot,
+  input: ExplainRequestInput,
+): string | null => {
   if (!snapshot.rootPath || !snapshot.scannedAt) {
     return "Repository has not been scanned yet. Run /api/v1/repository/scan first.";
   }

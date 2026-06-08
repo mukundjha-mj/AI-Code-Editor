@@ -21,16 +21,22 @@ const ENTRY_POINT_FILES = new Set([
   "server.js",
 ]);
 
-const REACT_ROUTE_BUILDERS = new Set(["createBrowserRouter", "createHashRouter", "createMemoryRouter"]);
+const REACT_ROUTE_BUILDERS = new Set([
+  "createBrowserRouter",
+  "createHashRouter",
+  "createMemoryRouter",
+]);
 
 const hasExportModifier = (node: ts.Node) =>
   ts.canHaveModifiers(node)
-    ? ts.getModifiers(node)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ?? false
+    ? (ts.getModifiers(node)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ??
+      false)
     : false;
 
 const hasDefaultModifier = (node: ts.Node) =>
   ts.canHaveModifiers(node)
-    ? ts.getModifiers(node)?.some((modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false
+    ? (ts.getModifiers(node)?.some((modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword) ??
+      false)
     : false;
 
 const hasJsxDescendant = (node: ts.Node): boolean => {
@@ -98,7 +104,10 @@ const extractStringProperty = (objectNode: ts.ObjectLiteralExpression, propertyN
   return null;
 };
 
-const collectRoutesFromObjectArray = (node: ts.ArrayLiteralExpression, routeAccumulator: Set<string>) => {
+const collectRoutesFromObjectArray = (
+  node: ts.ArrayLiteralExpression,
+  routeAccumulator: Set<string>,
+) => {
   for (const element of node.elements) {
     if (!ts.isObjectLiteralExpression(element)) {
       continue;
@@ -194,7 +203,11 @@ export class AstParser {
     };
   }
 
-  private parseScript(filePath: string, extension: SupportedExtension, content: string): ParsedFileMetadata {
+  private parseScript(
+    filePath: string,
+    extension: SupportedExtension,
+    content: string,
+  ): ParsedFileMetadata {
     const sourceFile = ts.createSourceFile(
       filePath,
       content,

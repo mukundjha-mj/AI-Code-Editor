@@ -1,10 +1,7 @@
 import type { env } from "../../config/env";
 import type { AiCapability } from "./ai.types";
 
-type EnvConfig = Pick<
-  typeof env,
-  "GROQ_CHAT_MODEL" | "GROQ_CODE_MODEL" | "GROQ_REASONING_MODEL"
->;
+type EnvConfig = Pick<typeof env, "GROQ_CHAT_MODEL" | "GROQ_CODE_MODEL" | "GROQ_REASONING_MODEL">;
 
 export type ModelRegistry = {
   getModel(capability: AiCapability): string;

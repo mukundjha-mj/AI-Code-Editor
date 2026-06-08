@@ -44,8 +44,12 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
         if (!current || nextOffset === 0 || current.kind !== payload.kind) {
           return payload;
         }
-        const nodeMap = new Map([...current.nodes, ...payload.nodes].map((node) => [node.id, node] as const));
-        const edgeMap = new Map([...current.edges, ...payload.edges].map((edge) => [edge.id, edge] as const));
+        const nodeMap = new Map(
+          [...current.nodes, ...payload.nodes].map((node) => [node.id, node] as const),
+        );
+        const edgeMap = new Map(
+          [...current.edges, ...payload.edges].map((edge) => [edge.id, edge] as const),
+        );
         return {
           ...payload,
           nodes: [...nodeMap.values()],
@@ -61,10 +65,12 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchGraph(0);
     setSelectedNode(null);
     setSelectedEdge(null);
     setHiddenGroupIds(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphType]);
 
   useEffect(() => {
@@ -76,13 +82,16 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
     return () => {
       window.clearTimeout(timeout);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, focusMode]);
 
   useEffect(() => {
     if (!focusMode) {
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchGraph(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusMode, selectedNode?.id]);
 
   const selectedNodeMetadata = useMemo(
@@ -156,7 +165,9 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
               setFocusMode((current) => !current);
             }}
             className={`rounded border px-2 py-1 text-xs ${
-              focusMode ? "border-cyan-500/70 bg-cyan-500/20 text-cyan-100" : "border-slate-700 text-slate-300"
+              focusMode
+                ? "border-cyan-500/70 bg-cyan-500/20 text-cyan-100"
+                : "border-slate-700 text-slate-300"
             }`}
           >
             Focus Mode
@@ -173,7 +184,9 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
         </div>
 
         {error ? (
-          <div className="rounded border border-rose-700 bg-rose-950/30 px-3 py-2 text-xs text-rose-200">{error}</div>
+          <div className="rounded border border-rose-700 bg-rose-950/30 px-3 py-2 text-xs text-rose-200">
+            {error}
+          </div>
         ) : null}
 
         <div className="min-h-0 flex-1">
@@ -246,7 +259,9 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
                         });
                       }}
                       className={`block w-full rounded border px-2 py-1 text-left ${
-                        hidden ? "border-amber-500/60 bg-amber-500/10 text-amber-100" : "border-slate-700"
+                        hidden
+                          ? "border-amber-500/60 bg-amber-500/10 text-amber-100"
+                          : "border-slate-700"
                       }`}
                     >
                       {hidden ? "Expand" : "Collapse"} {group.label} ({group.nodeIds.length})
@@ -267,9 +282,37 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
                       {key}: {String(value)}
                     </p>
                   ))}
+                  {Number(selectedNode.metadata.decisionCount ?? 0) > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        editorEventBus.emit("decisionPanelOpen", {
+                          type: selectedNode.type as
+                            | "file"
+                            | "symbol"
+                            | "component"
+                            | "function"
+                            | "class"
+                            | "route"
+                            | "module",
+                          value:
+                            selectedNode.symbol ||
+                            selectedNode.filePath ||
+                            selectedNode.route ||
+                            "",
+                          filePath: selectedNode.filePath,
+                        });
+                      }}
+                      className="mt-2 w-full rounded bg-cyan-500/10 border border-cyan-500/50 hover:bg-cyan-500/20 text-cyan-200 px-2 py-1 text-center font-medium transition"
+                    >
+                      View Linked Decisions ({selectedNode.metadata.decisionCount})
+                    </button>
+                  ) : null}
                 </div>
               ) : (
-                <p className="mt-1 text-slate-500">Select a node to inspect details and trigger Explain.</p>
+                <p className="mt-1 text-slate-500">
+                  Select a node to inspect details and trigger Explain.
+                </p>
               )}
             </section>
 
@@ -281,10 +324,14 @@ export const GraphWorkspace = ({ onOpenFile }: GraphWorkspaceProps) => {
                   <p className="text-slate-400">
                     {selectedEdge.from} {"->"} {selectedEdge.to}
                   </p>
-                  {selectedEdge.label ? <p className="text-slate-400">label: {selectedEdge.label}</p> : null}
+                  {selectedEdge.label ? (
+                    <p className="text-slate-400">label: {selectedEdge.label}</p>
+                  ) : null}
                 </div>
               ) : (
-                <p className="mt-1 text-slate-500">Select an edge to inspect relationship metadata.</p>
+                <p className="mt-1 text-slate-500">
+                  Select an edge to inspect relationship metadata.
+                </p>
               )}
             </section>
           </div>

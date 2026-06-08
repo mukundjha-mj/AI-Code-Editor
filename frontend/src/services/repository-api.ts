@@ -45,7 +45,9 @@ export const scanRepository = async (rootPath?: string): Promise<RepositoryScanR
 export const getRepositoryFiles = async (): Promise<RepositoryFilesResponse> =>
   request<RepositoryFilesResponse>("/files");
 
-export const getRepositoryFileContent = async (filePath: string): Promise<RepositoryFileContentResponse> =>
+export const getRepositoryFileContent = async (
+  filePath: string,
+): Promise<RepositoryFileContentResponse> =>
   request<RepositoryFileContentResponse>(`/file?path=${encodeURIComponent(filePath)}`);
 
 export const getRepositorySymbols = async (): Promise<RepositorySymbolsResponse> =>
